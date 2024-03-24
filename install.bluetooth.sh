@@ -36,21 +36,9 @@ bluetooth_dir="$build_dir/bluetooth"
 [[ -d $bluetooth_dir ]] && rm -rf $bluetooth_dir
 [[ ! -d $build_dir ]] && mkdir $build_dir
 
-# attempt to download linux-x.x.x.tar.xz kernel
-wget -c https://cdn.kernel.org/pub/linux/kernel/v$major_version.x/linux-$kernel_version.tar.xz -P $build_dir
+rm -rf $bluetooth_dir
+cp -rf /usr/src/linux/drivers/bluetooth/  $bluetooth_dir
 
-if [[ $? -ne 0 ]]; then
-   # if first attempt fails, attempt to download linux-x.x.tar.xz kernel
-   kernel_version=$kernel_short_version
-   wget -c https://cdn.kernel.org/pub/linux/kernel/v$major_version.x/linux-$kernel_version.tar.xz -P $build_dir
-fi
-
-[[ $? -ne 0 ]] && echo "kernel could not be downloaded...exiting" && exit
-
-# remove old kernel tar.xz archives
-find build/ -type f | grep -E linux.*.tar.xz | grep -v $kernel_version.tar.xz | xargs rm -f
-
-tar --strip-components=2 -xvf $build_dir/linux-$kernel_version.tar.xz --directory=build/ linux-$kernel_version/drivers/bluetooth
 mv $bluetooth_dir/Makefile $bluetooth_dir/Makefile.orig
 cp -p $bluetooth_dir/hci_bcm.c $bluetooth_dir/hci_bcm.c.orig
 cp $patch_dir/Makefile $bluetooth_dir/
